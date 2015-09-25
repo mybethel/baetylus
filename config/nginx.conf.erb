@@ -39,7 +39,7 @@ http {
     listen <%= ENV['PORT'] %>;
     server_name podcast.bethel.io;
 
-    location ~ "^/(\d|\w{24})\.xml$" {
+    location ~ "^/(\d|\w{24})\.xml" {
       resolver 8.8.8.8;
       proxy_pass  http://my.bethel.io/podcast/feed/$1;
       proxy_set_header Host my.bethel.io;
