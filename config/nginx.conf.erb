@@ -23,7 +23,7 @@ http {
   tcp_nopush on;
   tcp_nodelay on;
 
-  log_format l2met "measure#nginx.service=$request_time request_id=$http_x_request_id";
+  log_format l2met "nginx.service=$request_time host=$host request=$request status=$status request_id=$http_x_request_id";
   access_log logs/nginx/access.log l2met;
   error_log logs/nginx/error.log;
 
