@@ -1,0 +1,49 @@
+daemon off;
+
+worker_processes <%= ENV["NGINX_WORKERS"] || 4 %>;
+
+events {
+  use epoll;
+  accept_mutex on;
+  multi_accept on;
+  worker_connections 1024;
+}
+
+http {
+  gzip on;
+  gzip_disable "MSIE [1-6]\.(?!.*SV1)";
+  gzip_comp_level 2;
+  gzip_min_length 512;
+  gzip_proxied any;
+  gzip_vary on;
+  gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+
+  tcp_nopush on;
+  tcp_nodelay on;
+
+  log_format l2met "measure#nginx.service=$request_time request_id=$http_x_request_id";
+  access_log logs/nginx/access.log l2met;
+  error_log logs/nginx/error.log;
+
+  include mime.types;
+  default_type application/octet-stream;
+  sendfile on;
+
+  server {
+    listen <%= ENV['PORT'] %>;
+    server_name bethel.io www.bethel.io baetylus.bethel.io;
+    return 301 http://getbethel.com/;
+  }
+
+  server {
+    listen <%= ENV['PORT'] %>;
+    server_name podcast.bethel.io;
+
+    location ~ "^/(\d|\w{24})\.xml$" {
+      resolver 8.8.8.8;
+      proxy_pass  http://my.bethel.io/podcast/feed/$1;
+      proxy_set_header Host my.bethel.io;
+      proxy_set_header X-Forwarded-For $remote_addr;
+    }
+  }
+}
